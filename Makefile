@@ -5,7 +5,8 @@
 CC = gcc
 CFLAGS = -g -Wall -Werror -std=c99 -m64
 
-all: csim csim-ref test-csim test-trans tracegen
+#all: csim csim-ref test-csim test-trans tracegen
+all: csim test-trans tracegen
 
 csim: csim.c cachelab.c cachelab.h
 	$(CC) $(CFLAGS) -o csim csim.c cachelab.c -lm 
