@@ -32,13 +32,21 @@ void print_usage(const char *exe) {
     exit(-1);
 }
 
+int get_set(ADDR addr) {
+    return (addr >> b) & ((1ll << s) - 1);
+}
+
+int get_tag(ADDR addr) {
+    return addr >> (b + s);
+}
+
 void cache(ADDR addr, int size, int *hit, int *miss, int *eviction) {
     // we will ignore size by assuming that the access is aligned properly
     static int time = 0;
     time++;
 
-    int set = (addr >> b) & ((1ll << s) - 1);
-    int tag = addr >> (b + s);
+    int set = get_set(addr);
+    int tag = get_tag(addr);
 
     // whether hit?
     for (int i = 0; i < E; i++) if (sets[set].lines[i].valid) {
@@ -49,6 +57,7 @@ void cache(ADDR addr, int size, int *hit, int *miss, int *eviction) {
         }
     }
 
+    // find ans empty cache line or least used line
     (*miss) += 1;
     int mi = 1e9, which = -1;
     for (int i = 0; i < E; i++) {
@@ -65,6 +74,7 @@ void cache(ADDR addr, int size, int *hit, int *miss, int *eviction) {
         }
     }
 
+    // evict existing line
     (*eviction) += 1;
     sets[set].lines[which].valid = 1;
     sets[set].lines[which].tag = tag;
@@ -105,6 +115,7 @@ int main(int argc, char *argv[]) {
         print_usage(argv[0]);
     }
 
+    // allocating cache sets and cache lines.
     sets = malloc(sizeof(CacheSet) * (1<<s));
     for (int i = 0; i < (1<<s); i++) {
         sets[i].lines = malloc(sizeof(CacheLine) * E);
@@ -142,8 +153,10 @@ int main(int argc, char *argv[]) {
         hit_count += hit;
         miss_count += miss;
         eviction_count += eviction;
+
+        // print details
         if (verbose) {
-            printf("%s %x,%d ", ops, addr, size);
+            printf("%s %x,%d set=%d, tag = %d ", ops, addr, size, get_set(addr), get_tag(addr));
             if (miss) printf("miss ");
             if (eviction) printf("eviction ");
             if (hit == 1) printf("hit ");
