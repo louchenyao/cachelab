@@ -1,3 +1,8 @@
+/*
+ * Name: Chenyao Lou
+ * ID: 2016011343
+ */
+
 /* 
  * trans.c - Matrix transpose B = A^T
  *
